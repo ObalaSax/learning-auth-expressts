@@ -11,29 +11,57 @@ function SignUp() {
     signUpNav("/");
   };
   return (
-    <Box>
-      <Box>
-        <Typography variant="h1" color="initial">
-          Sign Up
+    <Box
+      sx={{
+        alignContent: "center",
+        justifyItems: "center",
+        padding: 2,
+        border: 2,
+        minHeight: "100vh",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          marginY: 2,
+          alignItems: "center",
+          gap: 2,
+          flexDirection: "column",
+          minWidth: "80vw",
+          boxShadow: 5,
+          padding: 2,
+        }}
+      >
+        <Box>
+          <Typography variant="h1" color="initial">
+            Sign Up
+          </Typography>
+        </Box>
+
+        <TextField
+          required
+          fullWidth
+          margin="normal"
+          label="Username"
+          value={username}
+          onChange={(e) => setUserName(e.target.value)}
+        />
+        <TextField
+          required
+          fullWidth
+          margin="normal"
+          label="Password"
+          value={password}
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button onClick={handleSignUp} variant="contained" fullWidth>
+          SignUp
+        </Button>
+        <Typography variant="subtitle1" color="initial">
+          Have an account? <a href="/">Login</a>
         </Typography>
       </Box>
-      <TextField
-        required
-        label="Username"
-        value={username}
-        onChange={(e) => setUserName(e.target.value)}
-      />
-      <TextField
-        required
-        label="Password"
-        value={password}
-        type="password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <Button onClick={handleSignUp}>SignUp</Button>
-      <Typography variant="subtitle1" color="initial">
-        Have an account? <a href="/">Login</a>
-      </Typography>
     </Box>
   );
 }
