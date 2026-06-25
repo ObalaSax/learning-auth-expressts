@@ -3,25 +3,53 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../Redux/AuthApi";
 
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../Redux/AuthSlice";
+
 function Login() {
+  const dispatch = useDispatch();
+  const loginNav = useNavigate();
+
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  //Auth Route
+
   const [login, { isLoading: loginLoading }] = useLoginMutation();
-  const loginNav = useNavigate();
+
   const handleLogin = async () => {
     if (!username || !password) {
-      setError("Njwanga wewe");
+      setError("Username and password are required");
       return;
     }
+
     try {
-      await login({ username, password }).unwrap();
+      /**
+       * ✅ FIX 1: Capture response
+       */
+      const response = await login({ username, password }).unwrap();
+
+      /**
+       * ✅ FIX 2: Correct dispatch payload
+       * Your backend returns: { success, data: { user, token } }
+       */
+      dispatch(setCredentials(response.data));
+
+      /**
+       * ✅ Navigate after success
+       */
       loginNav("/welcome");
-    } catch (error) {
-      console.log(error);
+    } catch (error: unknown) {
+      /**
+       * ✅ FIX 3: Proper error handling
+       */
+      const isApiError = (err: unknown): err is { data?: { message?: string } } =>
+        typeof err === "object" && err !== null && "data" in err;
+
+      const errMessage = isApiError(error) ? error.data?.message : undefined;
+      setError(errMessage || "Invalid username or password");
     }
   };
+
   return (
     <Box
       sx={{
@@ -45,11 +73,11 @@ function Login() {
         }}
       >
         <Box sx={{ justifyItems: "center" }}>
-          <Typography variant="h1" color="initial">
-            Login
-          </Typography>
+          <Typography variant="h3">Login</Typography>
         </Box>
+
         {error && <Alert severity="error">{error}</Alert>}
+
         <TextField
           required
           fullWidth
@@ -58,25 +86,28 @@ function Login() {
           margin="normal"
           onChange={(e) => setUserName(e.target.value)}
         />
+
         <TextField
           required
           fullWidth
           margin="normal"
           label="Password"
-          value={password}
           type="password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
         <Button
           disabled={loginLoading}
           fullWidth
           onClick={handleLogin}
           variant="contained"
         >
-          {loginLoading ? "Loging In" : "Login"}
+          {loginLoading ? "Logging In..." : "Login"}
         </Button>
-        <Typography variant="subtitle1" color="initial">
-          Login Have an account? <a href="/signup">Sign Up</a>
+
+        <Typography variant="subtitle1">
+          Don't have an account? <a href="/signup">Sign Up</a>
         </Typography>
       </Box>
     </Box>

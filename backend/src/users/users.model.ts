@@ -1,8 +1,14 @@
 import { myPool } from "../server.js";
 
 export interface UserData {
-  username: String;
-  password: String;
+  username: string;
+  password: string;
+}
+export interface UserRow {
+  user_id: string;
+  username: string;
+  password: string;
+  created_at: string;
 }
 const userModel = {
   async signUp(userData: UserData) {
@@ -11,7 +17,11 @@ const userModel = {
     const results = await myPool.query(signUpQuery, values);
     return results.rows[0];
   },
-  async login() {},
+  async getUsername(username: string): Promise<UserRow | null> {
+    const usernameQuery = "SELECT * FROM users WHERE username =$1";
+    const usernameResult = await myPool.query(usernameQuery, [username]);
+    return usernameResult.rows[0];
+  },
 };
 
 export default userModel;
