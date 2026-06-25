@@ -1,14 +1,26 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLoginMutation } from "../Redux/AuthApi";
 
 function Login() {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   //Auth Route
+  const [login, { isLoading: loginLoading }] = useLoginMutation();
   const loginNav = useNavigate();
-  const handleLogin = () => {
-    loginNav("/welcome");
+  const handleLogin = async () => {
+    if (!username || !password) {
+      setError("Njwanga wewe");
+      return;
+    }
+    try {
+      await login({ username, password }).unwrap();
+      loginNav("/welcome");
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <Box
@@ -37,6 +49,7 @@ function Login() {
             Login
           </Typography>
         </Box>
+        {error && <Alert severity="error">{error}</Alert>}
         <TextField
           required
           fullWidth
@@ -54,8 +67,13 @@ function Login() {
           type="password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button fullWidth onClick={handleLogin} variant="contained">
-          Login
+        <Button
+          disabled={loginLoading}
+          fullWidth
+          onClick={handleLogin}
+          variant="contained"
+        >
+          {loginLoading ? "Loging In" : "Login"}
         </Button>
         <Typography variant="subtitle1" color="initial">
           Login Have an account? <a href="/signup">Sign Up</a>

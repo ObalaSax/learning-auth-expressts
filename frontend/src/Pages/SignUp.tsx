@@ -1,14 +1,33 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSignupMutation } from "../Redux/AuthApi";
 
 function SignUp() {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [signUp, { isLoading }] = useSignupMutation();
   //Auth Route
   const signUpNav = useNavigate();
-  const handleSignUp = () => {
-    signUpNav("/");
+  const reset = () => {
+    setUserName("");
+    setPassword("");
+    setError("");
+  };
+  const handleSignUp = async () => {
+    if (!username || !password) {
+      setError("Please Fill all fields");
+      return;
+    }
+    try {
+      await signUp({ username, password }).unwrap();
+      reset();
+      signUpNav("/");
+    } catch (error) {
+      console.error(error);
+      setError(error?.data?.message || "Something went wrong during sign up");
+    }
   };
   return (
     <Box
@@ -37,7 +56,11 @@ function SignUp() {
             Sign Up
           </Typography>
         </Box>
-
+        {error && (
+          <Alert severity="error" sx={{ width: "100%" }}>
+            {error}
+          </Alert>
+        )}
         <TextField
           required
           fullWidth
@@ -55,8 +78,13 @@ function SignUp() {
           type="password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button onClick={handleSignUp} variant="contained" fullWidth>
-          SignUp
+        <Button
+          onClick={handleSignUp}
+          variant="contained"
+          fullWidth
+          disabled={isLoading}
+        >
+          {isLoading ? "Signing Up..." : "SignUp"}
         </Button>
         <Typography variant="subtitle1" color="initial">
           Have an account? <a href="/">Login</a>
